@@ -22,7 +22,7 @@ def make_midprice(input_path, freq, output_path):
         print("Resampled mid-price data {} not written".format(output_path))
 
 if __name__ == "__main__":
-    input_path, no, symbol, freq, output_path = sys.argv[1:] # data_path: "testing/test_data" compression : none or "gzip"
+    input_path, freq, output_path = sys.argv[1:] # data_path: "testing/test_data" compression : none or "gzip"
     if input_path.split(".")[-1] == "gz":
         compression = "gzip"
     else:
