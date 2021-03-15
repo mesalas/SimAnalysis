@@ -1,24 +1,33 @@
+import sys
+from helpers.data_conf import make_data_conf
+
 import orderbooks
 from helpers.get_exchange_and_sim import get_exchange_and_sim
 
 def analysis_kwargs(data_conf: dict) -> dict:
     return {"compression": data_conf["compression"], "skip_footer": data_conf["droplast"]}
 
-def make_midprice(data_conf, sample_rate = "1T"):
-    orderbook_path = lambda data_conf,symbol : data_conf["dir"] + symbol + get_exchange_and_sim(data_conf) + "_Matching-OrderBook.csv"
+def make_midprice(input_path, freq, output_path):
+    try:
+        order_book = orderbooks.order_book_data(input_path, skip_footer=False, time_zone="America/New_York",
+                            open_time="9:30:00", trading_day_length="6:30:00")
+    except:
+        print("{} not read".format(input_path))
+    try:
 
-    # midprice
-    for inst in data_conf["instruments"]:
-        try:
-            order_book = orderbooks.order_book_data(orderbook_path(data_conf, inst), **analysis_kwargs(data_conf))
-        except:
-            print("{} not read".format(orderbook_path(data_conf, inst)))
-        try:
-            out_path = data_conf["output_dir"] +str(data_conf["analysis_no"]) + "_" + inst + "_mp_" +  sample_rate+ ".csv.gz"
-            order_book.get_resampled_midprice(sample_rate).to_csv(out_path,
-                                                                         compression = "gzip",
-                                                                           index = False)
-        except:
-            print("Resampled mid-price data {} not written".format(out_path))
+        order_book.get_resampled_midprice(freq).to_csv(output_path,
+                                                                     compression = "gzip",
+                                                                       index = False)
+    except:
+        print("Resampled mid-price data {} not written".format(output_path))
+
+if __name__ == "__main__":
+    input_path, no, symbol, freq, output_path = sys.argv[1:] # data_path: "testing/test_data" compression : none or "gzip"
+    if input_path.split(".")[-1] == "gz":
+        compression = "gzip"
+    else:
+        compression = None
+
+    make_midprice(input_path, freq, output_path)
 
 
