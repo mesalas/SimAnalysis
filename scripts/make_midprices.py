@@ -1,7 +1,7 @@
 import sys
 from helpers.data_conf import make_data_conf
 
-import orderbooks
+import scripts.orderbooks as orderbooks
 from helpers.get_exchange_and_sim import get_exchange_and_sim
 
 def analysis_kwargs(data_conf: dict) -> dict:

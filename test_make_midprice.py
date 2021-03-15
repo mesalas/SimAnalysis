@@ -1,6 +1,6 @@
 import unittest
-import make_midprices
-import plot_midprice
+import scripts.make_midprices as make_midprices
+import scripts.plot_midprice as plot_midprice
 from helpers.data_conf import make_data_conf
 
 class MyTestCase(unittest.TestCase):
@@ -18,6 +18,9 @@ class MyTestCase(unittest.TestCase):
         output = "testing/test_data/figures/0_mp_5T.png"
 
         plot_midprice.make_mpl_midprice_plot(output, inputs)
+
+        output = "testing/test_data/figures/0_mp_5T.html"
+        plot_midprice.make_mpld3_midprice_plot(output, inputs)
 
 
 if __name__ == '__main__':
