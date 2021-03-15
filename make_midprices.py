@@ -11,9 +11,14 @@ def make_midprice(data_conf, sample_rate = "1T"):
     for inst in data_conf["instruments"]:
         try:
             order_book = orderbooks.order_book_data(orderbook_path(data_conf, inst), **analysis_kwargs(data_conf))
-            out_path = data_conf["output_dir"] +data_conf["analysis_no"] + "_" + inst + "_mp_" +  sample_rate+ ".csv.gz"
-            order_book.order_book.get_resampled_midprice(sample_rate).to_csv(out_path,
-                                                                             compression = "gzip",
-                                                                             index = False)
         except:
-            print("{} not read".format(orderbook_path(data_conf,inst)))
+            print("{} not read".format(orderbook_path(data_conf, inst)))
+        try:
+            out_path = data_conf["output_dir"] +str(data_conf["analysis_no"]) + "_" + inst + "_mp_" +  sample_rate+ ".csv.gz"
+            order_book.get_resampled_midprice(sample_rate).to_csv(out_path,
+                                                                         compression = "gzip",
+                                                                           index = False)
+        except:
+            print("Resampled mid-price data {} not written".format(out_path))
+
+
