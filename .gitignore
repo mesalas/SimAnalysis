@@ -4,3 +4,7 @@
 .DS_Store
 
 testing/test_data/reduced_data/
+
+testing/test_data/
+
+__pycache__/

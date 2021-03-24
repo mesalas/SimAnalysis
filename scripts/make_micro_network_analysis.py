@@ -3,6 +3,8 @@ import networkx as nx
 import numpy as np
 import community
 from collections import defaultdict
+from scripts.negopy import negopy,nx2df
+
 def normalize_directional_graph(graph):
     adjacency_df = nx.to_pandas_adjacency(graph)
     normalized_adjacency_df = adjacency_df.div(adjacency_df.sum(axis=1), axis=0).fillna(0)
@@ -15,12 +17,23 @@ def make_micro_network_analysis(nodes, edges,graph):
     print("total number of nodes {}".format(len(nodes)))
     print("Total number of links {}".format(len(edges)))
 
-def make_macro_network_analysis(graph):
+def make_negopy_clusters(graph):
+    df = nx2df(graph)
+    cliques = negopy(df, graph)
+    return cliques
+
+def make_louvian_clustering_analysis(graph):
+    return make_macro_network_analysis(graph, community.best_partition)
+def make_negopy_clustering_analysis(graph):
+    return make_macro_network_analysis(graph, make_negopy_clusters)
+
+def make_macro_network_analysis(graph, clustering_method):
     normalized_graph = normalize_directional_graph(graph)
-    part = community.best_partition(nx.to_undirected(normalized_graph))
+    part = clustering_method(nx.to_undirected(normalized_graph))
 
     print("Number of communities {}".format(np.max([part[i] for i in part.keys()])))
     clique_agents_map = defaultdict(list)
+
 
     # Make dict. key is clique number val is list of members
     for key,val in sorted(part.items()):
@@ -35,6 +48,7 @@ def make_macro_network_analysis(graph):
     ave_pct = list()
     ave_relative_vol_within_clique = list()
     n_commun = 0
+
     for clique,agents in clique_agents_map.items():
         print("Clique no {}".format(clique))
 
@@ -90,7 +104,8 @@ def make_micro_and_macro_network_analysis(input_path, cutoff,output_path):
     graph.add_weighted_edges_from(edges)
 
     make_micro_network_analysis(nodes, edges, graph)
-    directed_graph_with_cliques = make_macro_network_analysis(graph)
+    #directed_graph_with_cliques = make_louvian_clustering_analysis(graph)
+    directed_graph_with_cliques = make_negopy_clustering_analysis(graph)
     nx.write_gexf(directed_graph_with_cliques, output_path)
 
 
