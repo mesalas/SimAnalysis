@@ -5,7 +5,7 @@ from helpers.data_conf import make_data_conf
 
 class MyTestCase(unittest.TestCase):
     def test_resample_and_plot_data(self):
-        inputs = ["testing/test_data/ABC_NYSE@0_Matching-OrderBook.csv",
+        inputs = ["../Simulations/run87/batch1/working/ABC_NYSE@0_Matching-OrderBook.csv",
                   "testing/test_data/DEF_NYSE@0_Matching-OrderBook.csv",
                   "testing/test_data/GHI_NYSE@0_Matching-OrderBook.csv"]
         outputs = ["testing/test_data/reduced_data/0_ABC_mp_5T.csv.gz",
