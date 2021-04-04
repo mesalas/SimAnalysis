@@ -1,8 +1,8 @@
 import matplotlib.pylab as plt
 import pandas as pd
 import sys
-import mpld3
-from mpld3 import plugins
+#import mpld3
+#from mpld3 import plugins
 
 def make_figure(input_paths):
     fig,ax = plt.subplots()
@@ -19,22 +19,23 @@ def make_mpl_midprice_plot(output_path, input_paths):
 
     fig.savefig(output_path)
 
-def make_mpld3_midprice_plot(output_path, input_paths):
-    fig,ax = make_figure(input_paths)
-    handles, labels = ax.get_legend_handles_labels() # return lines and labels
-    interactive_legend = plugins.InteractiveLegendPlugin(zip(handles,
-                                                             ax.lines),
-                                                         labels,
-                                                         alpha_unsel=.1,
-                                                         alpha_over=1.5,
-                                                         start_visible=True)
-    plugins.connect(fig, interactive_legend)
-
-    html = mpld3.fig_to_html(fig)
-    with open(output_path, "w") as html_file:
-        html_file.write(html)
+# def make_mpld3_midprice_plot(output_path, input_paths):
+#     fig,ax = make_figure(input_paths)
+#     handles, labels = ax.get_legend_handles_labels() # return lines and labels
+#     interactive_legend = plugins.InteractiveLegendPlugin(zip(handles,
+#                                                              ax.lines),
+#                                                          labels,
+#                                                          alpha_unsel=.1,
+#                                                          alpha_over=1.5,
+#                                                          start_visible=True)
+#     plugins.connect(fig, interactive_legend)
+#
+#     html = mpld3.fig_to_html(fig)
+#     with open(output_path, "w") as html_file:
+#         html_file.write(html)
 
 if __name__ == "__main__":
-    output_path, input_paths = sys.argv[1:] # data_path: "testing/test_data" compression : none or "gzip"
+    output_path = sys.argv[1]
+    input_paths = sys.argv[2:] # data_path: "testing/test_data" compression : none or "gzip"
     make_mpl_midprice_plot(output_path, input_paths)
 
