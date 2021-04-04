@@ -1,5 +1,5 @@
 import pandas as pd
-import timemethods
+from scripts import timemethods
 import numpy as np
 #from tqdm import tqdm
 import logging
@@ -13,7 +13,7 @@ def get_volume_to_side_by_agent(matched_orders, agent_name, side,sample_freq = "
     return timemethods.date_time_to_sim_time(vol_to_side)
 
 class MatchedOrdersData:
-    def __init__(self, path, compression=None, skip_footer=False, time_zone="America/New_York",
+    def __init__(self, path, compression=None, skip_footer=True, time_zone="America/New_York",
                             open_time="9:30:00", trading_day_length="6:30:00"):
         self.path = path
         self.compression = compression

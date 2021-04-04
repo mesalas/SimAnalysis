@@ -1,7 +1,8 @@
 import pandas as pd
-import timemethods
+from scripts import timemethods
 import numpy as np
-import matplotlib.pylab as  plt
+
+
 #import trades
 #import analysis
 

@@ -1,6 +1,6 @@
-rule all: #Get the framework we need-
+rule all:
   input:
-    "scripts/make_midprices.py","scripts/plot_midprice.py",expand(["figures/{no}_mp_{freq}.png"], no = 1, freq = "5T")
+    expand(["../temp_data/tmp/figures/{batch_no}_mp_{freq}.png"], batch_no = [1], freq = "5T")
 
 rule get_analysis_framework:
     output: "scripts/make_midprices.py","scripts/plot_midprice.py"
@@ -8,9 +8,9 @@ rule get_analysis_framework:
 
 rule midprice_data:
     input:
-         "../data/temp/batch{no}/working/{symbol}_NYSE@0_Matching-OrderBook.csv" #,"scripts/BarsFromTrades.py"
+         "{path}/{symbol}_NYSE@0_Matching-OrderBook.csv" #,"scripts/BarsFromTrades.py"
     output:
-          "reduced_data/{no}_{symbol}_mp_{freq}.csv.gz"
+          "{path}/reduced_data/{no}_{symbol}_mp_{freq}.csv.gz"
     conda:
         "envs/deps.yaml"
     shell:
@@ -18,12 +18,14 @@ rule midprice_data:
 
 rule midprice_plots:
     input:
-        script = "scripts/make_midprices.py",
-        files = "reduced_data/{no}_ABC_mp_{freq}.csv.gz reduced_data/{no}_DEF_mp_{freq}.csv.gz reduced_data/{no}_GHI_mp_{freq}.csv.gz"
+        #script = "scripts/make_midprices.py",
+        "{path}/reduced_data/{no}_ABC_mp_{freq}.csv.gz",
+                 "{path}/reduced_data/{no}_DEF_mp_{freq}.csv.gz",
+                 "{path}/reduced_data/{no}_GHI_mp_{freq}.csv.gz"
     output:
-        "figures/{no}_mp_{freq}.png"
+        "{path}/figures/{no}_mp_{freq}.png"
     conda:
         "envs/deps.yaml"
     shell:
-         "python {input.script} {output} {input.files}"
+         "python scripts/plot_midprice.py {output} {input}"
 
