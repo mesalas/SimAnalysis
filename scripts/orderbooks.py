@@ -4,7 +4,7 @@ import timemethods
 
 class order_book_data:
 
-    def __init__(self, path, compression=None, skip_footer=False, time_zone="America/New_York",
+    def __init__(self, path, compression=None, skip_footer=True, time_zone="America/New_York",
                             open_time="9:30:00", trading_day_length="6:30:00"):
         self.path = path
         self.compression = compression

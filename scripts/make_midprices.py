@@ -1,8 +1,8 @@
 import sys
-from helpers.data_conf import make_data_conf
+#from helpers.data_conf import make_data_conf
 
-import scripts.orderbooks as orderbooks
-from helpers.get_exchange_and_sim import get_exchange_and_sim
+import orderbooks
+#from helpers.get_exchange_and_sim import get_exchange_and_sim
 
 def analysis_kwargs(data_conf: dict) -> dict:
     return {"compression": data_conf["compression"], "skip_footer": data_conf["droplast"]}
