@@ -8,3 +8,7 @@ testing/test_data/reduced_data/
 testing/test_data/
 
 __pycache__/
+
+.snakemake/
+
+reduced_data/
