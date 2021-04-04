@@ -42,33 +42,31 @@ class agent_data:
         agentnames = list(self.agents_log.active_agent.unique())  # Get unique names
         return [s for s in agentnames if name_prefix in s]
 
-# def get_full_agent_info(data_conf, instruments, agent_class_names, info ,  filter_names = None):
-#     agents_results = {}
-#     for agent_class_name in agent_class_names:
-#         agents_results[agent_class_name] = []
-#
-#     for symbol in instruments:
-#         agents_log = agent_data(data_conf["dir"] + symbol + analysis.get_exchange_and_sim(
-#                 data_conf) + "_Matching-agents.csv", compression=data_conf["compression"], skip_footer=data_conf["droplast"])
-#
-#
-#         # Filter out unwanted agents
-#         if filter_names is not None:
-#             for agent in filter_names:
-#                 agent_name_map = agents_log.agents_log["AgentName"].str.contains(agent)
-#                 agents_log.agents_log = agents_log.agents_log[~agent_name_map]
-#
-#         for agent_name in agent_class_names:
-#             agent_name_map = agents_log.agents_log["AgentName"].str.contains(agent_name)
-#             agents_results[agent_name].append(agents_log.agents_log[agent_name_map][["AgentName", "DateTime", info]].pivot_table(
-#                 columns="AgentName", values=info,
-#                 index="DateTime").groupby(pd.Grouper(freq="B")).last().ffill())
-#             agents_log.agents_log = agents_log.agents_log[~agent_name_map]
-#
-#     #combine results across all instruments
-#     for key in agents_results:
-#         agents_results[key] = sum(agents_results[key])
-#     return agents_results
+def get_full_agent_info(path, agent_class_names, info ,  filter_names = None):
+    agents_results = {}
+    for agent_class_name in agent_class_names:
+        agents_results[agent_class_name] = []
+
+
+    agents_log = agent_data(path, skip_footer=True)
+
+    # Filter out unwanted agents
+    if filter_names is not None:
+        for agent in filter_names:
+            agent_name_map = agents_log.agents_log["AgentName"].str.contains(agent)
+            agents_log.agents_log = agents_log.agents_log[~agent_name_map]
+
+    for agent_name in agent_class_names:
+        agent_name_map = agents_log.agents_log["AgentName"].str.contains(agent_name)
+        agents_results[agent_name].append(agents_log.agents_log[agent_name_map][["AgentName", "DateTime", info]].pivot_table(
+            columns="AgentName", values=info,
+            index="DateTime").groupby(pd.Grouper(freq="B")).last().ffill())
+        agents_log.agents_log = agents_log.agents_log[~agent_name_map]
+
+    #combine results across all instruments
+    for key in agents_results:
+        agents_results[key] = sum(agents_results[key])
+    return agents_results
 
 
 def get_agent_statistic(agents_log, statistic, agent_name, sum=False, time_index="simTime"):
