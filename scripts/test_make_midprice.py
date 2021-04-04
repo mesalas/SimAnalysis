@@ -4,7 +4,7 @@ sys.path.append("scripts/") #Snake make will runn python scripts from scripts/
 import make_midprices as make_midprices
 import plot_midprice as plot_midprice
 
-from helpers.data_conf import make_data_conf
+#from helpers.data_conf import make_data_conf
 
 class MyTestCase(unittest.TestCase):
     def test_resample_and_plot_data(self):
@@ -22,8 +22,8 @@ class MyTestCase(unittest.TestCase):
 
         plot_midprice.make_mpl_midprice_plot(output, inputs)
 
-        output = "testing/test_data/figures/0_mp_5T.html"
-        plot_midprice.make_mpld3_midprice_plot(output, inputs)
+        #output = "testing/test_data/figures/0_mp_5T.html"
+        #plot_midprice.make_mpld3_midprice_plot(output, inputs)
 
 
 if __name__ == '__main__':
