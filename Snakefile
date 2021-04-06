@@ -9,6 +9,16 @@ rule get_analysis_framework:
     output: "scripts/make_midprices.py","scripts/plot_midprice.py"
     shell: "git clone https://github.com/mesalas/SimAnalysis.git scripts"
 
+rule bars_data:
+    input:
+         "{path}/{symbol}_NYSE@0_Matching-MatchedOrders.csv" #,"scripts/BarsFromTrades.py"
+    output:
+          "{path}/reduced_data/{no}_{symbol}_bars_{freq}.csv.gz"
+    conda:
+        "envs/deps.yaml"
+    shell:
+         "python scripts/make_trade_bars.py {input} {wildcards.freq} {output}"
+
 rule midprice_data:
     input:
          "{path}/{symbol}_NYSE@0_Matching-OrderBook.csv" #,"scripts/BarsFromTrades.py"
