@@ -2,6 +2,7 @@ import unittest
 import sys
 sys.path.append("scripts/") #Snake make will runn python scripts from scripts/
 import make_pl_analysis as make_pl_analysis
+import plot_daily_pl as plot_daily_pl
 
 #from helpers.data_conf import make_data_conf
 
@@ -16,14 +17,11 @@ class MyTestCase(unittest.TestCase):
 
         [make_pl_analysis.make_pl_analysis(input_file,output_file) for input_file,output_file in zip(inputs,outputs)]
 
-        #inputs = outputs
-        #output = "testing/test_data/figures/0_mp_5T.png"
 
-        #plot_midprice.make_mpl_midprice_plot(output, inputs)
+        inputs = outputs
+        output = "testing/test_data/figures/0_daily_pl.png"
 
-        #output = "testing/test_data/figures/0_mp_5T.html"
-        #plot_midprice.make_mpld3_midprice_plot(output, inputs)
-
+        plot_daily_pl.make_mpl_daily_pl_plot(output, inputs)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,5 +1,5 @@
 import pandas as pd
-from scripts import timemethods
+import timemethods
 import numpy as np
 
 
