@@ -90,6 +90,42 @@ class MatchedOrdersData:
         timestamp_units = "ns"
         return timemethods.process_timestamps(matched_orders, timestamp_col_name, timestamp_units, self.time_zone,
                                               self.open_time, self.trading_day_length)
+
+    def make_trade_bars(self, freq : str) -> pd.DataFrame:
+        bar_returns = lambda x : np.log(x.iloc[-1]) - np.log(x.iloc[0])
+        bar_range = lambda x : np.max(x) - np.min(x)
+        daily_grouped_trade_price = self.matched_orders[["DateTime", self.active_fill_price_col]].groupby(
+            pd.Grouper(key="DateTime",
+                       freq='B'
+                       ), sort=False
+        )
+        bars = list()
+        for name,group in daily_grouped_trade_price:
+            group = group.set_index("DateTime", drop=False)
+            group = group.resample(freq
+                   ).agg({self.active_fill_price_col :["first", "last", np.max, np.min, bar_range, bar_returns],
+                          "DateTime" : ["first", "last"]}) #.reset_index(level=0,
+            group.columns = ['open', 'close', 'high', 'low', "range", "return", "first", "last"] #rename columns
+            #group.columns = group.columns.droplevel(0)
+            bars.append(group)#group.rename(columns={"first" : "open",
+                                 #             "last" : "close",
+                                 #             'amax': 'high',
+                                 #             'amin': 'low',
+                                 #             "<lambda_0>" : "range",
+                                 #             "<lambda_1>" : "return"}) )                           #drop=True))
+        bars = pd.concat(bars)
+        bars["DateTime"] = bars.index
+        return timemethods.date_time_to_sim_time(bars).reset_index(drop = True)
+    def select_data_in_windows(self,windows):
+        self.matched_orders.index = self.matched_orders["DateTime"]
+        selected_trades = list()
+        for window in windows:
+            try:
+                selected_trades.append(self.matched_orders.loc[window[0]:window[1]])
+            except:
+                continue
+        self.matched_orders = pd.concat(selected_trades)
+
     def get_unique_agent_classes(self):
         return pd.Series([s.split('-')[0] for s in self.matched_orders[self.active_agent_col]]).unique()
 
