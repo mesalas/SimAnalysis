@@ -3,9 +3,9 @@ from scripts.trades import MatchedOrdersData
 import sys
 import numpy as np
 
-def make_traded_volume_matrix(input_path, cutoff):
+def make_traded_volume_matrix(agents_log, cutoff):
 
-    agents_log = MatchedOrdersData(input_path)  # Read matched orders files
+    agents_log  # Read matched orders files
 
     # Make matrix of trades between agents and list of agent names. The number of trades will be used as the strength of the connections
     # The names will be the nodes
@@ -37,6 +37,6 @@ def save_directed_graph(graph, output):
 
 if __name__ == "__main__":
     input_path, cutoff, output_path = sys.argv[1:]
-    traded_volume_matrix = make_traded_volume_matrix(input_path, cutoff)
+    traded_volume_matrix = make_traded_volume_matrix(MatchedOrdersData(input_path), cutoff)
     directed_graph = make_directed_graph(traded_volume_matrix[0],traded_volume_matrix[1])
     save_directed_graph(directed_graph, output_path)
