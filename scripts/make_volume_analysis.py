@@ -2,7 +2,7 @@ from agents import get_full_agent_info
 import pandas as pd
 import sys
 import helpers
-def make_pl_analysis(input_path,output_path):
+def make_volume_analysis(input_path,output_path):
 
     agents = [
         "MarketMaker",
@@ -20,7 +20,7 @@ def make_pl_analysis(input_path,output_path):
 
     agents_results = get_full_agent_info(
         input_path,
-        info="PL",
+        info="Vol",
         agent_class_names = agents,
         filter_names = None
     )
@@ -31,4 +31,4 @@ def make_pl_analysis(input_path,output_path):
 if __name__ == "__main__":
     input_path, output_path = sys.argv[1:]  # data_path: "testing/test_data" compression : none or "gzip"
 
-    make_pl_analysis(input_path, output_path)
+    make_volume_analysis(input_path, output_path)
