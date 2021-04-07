@@ -1,11 +1,11 @@
 import networkx as nx
-from scripts.trades import MatchedOrdersData
+from trades import MatchedOrdersData
 import sys
 import numpy as np
 
 def make_traded_volume_matrix(agents_log, cutoff):
 
-    agents_log  # Read matched orders files
+    #agents_log  # Read matched orders files
 
     # Make matrix of trades between agents and list of agent names. The number of trades will be used as the strength of the connections
     # The names will be the nodes
@@ -16,7 +16,7 @@ def make_traded_volume_matrix(agents_log, cutoff):
     #    agent_volumes["volume"] = agent_volumes["volume"] / total_volume_for_first_agent["volume"]
 
     nodes = agent_volumes["active_agent"].append(agent_volumes["passive_agent"]).unique()
-    edges = [t for t,total in zip(agent_volumes.itertuples(index=False, name=None),total_volume_for_first_agent["volume"]) if t[2] > cutoff*total and t[0] != t[1]]
+    edges = [t for t,total in zip(agent_volumes.itertuples(index=False, name=None),total_volume_for_first_agent["volume"]) if t[2] > cutoff*total]# and t[0] != t[1]]
 
     return nodes,edges
 

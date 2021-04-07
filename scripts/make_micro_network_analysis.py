@@ -1,22 +1,26 @@
-from scripts.make_network import make_traded_volume_matrix, make_directed_graph
+
+from make_network import make_traded_volume_matrix, make_directed_graph
 import networkx as nx
+import pandas as pd
 import numpy as np
 import community
 from collections import defaultdict
-from scripts.negopy import negopy,nx2df
+from negopy import negopy,nx2df
+import trades
+import sys
 
 def calculate_total_node_volume(graph : nx.DiGraph):
     for node in list(graph.nodes):
-        graph.nodes[node]["out volume"] = int(sum([graph.edges[e[0], e[1]]["weight"] for e in graph.out_edges(node)]))
-        graph.nodes[node]["in volume"] = int(sum([graph.edges[e[0], e[1]]["weight"] for e in graph.in_edges(node)]))
-        graph.nodes[node]["volume"] = graph.nodes[node]["out volume"] + graph.nodes[node]["in volume"]
+        graph.nodes[node]["out_volume"] = int(sum([graph.edges[e[0], e[1]]["weight"] for e in graph.out_edges(node)]))
+        graph.nodes[node]["in_volume"] = int(sum([graph.edges[e[0], e[1]]["weight"] for e in graph.in_edges(node)]))
+        graph.nodes[node]["volume"] = graph.nodes[node]["out_volume"] + graph.nodes[node]["in_volume"]
     return graph
 
 def normalize_directional_graph(graph):
     for node in list(graph.nodes):
         for out_edge in list(graph.out_edges(node)):
             graph.edges[out_edge]["volume"] = graph.edges[out_edge]["weight"]
-            graph.edges[out_edge]["weight"] = graph.edges[out_edge]["weight"] / graph.nodes[node]["out volume"]
+            graph.edges[out_edge]["out fraction"] = graph.edges[out_edge]["weight"] / graph.nodes[node]["out_volume"]
 
 
     #adjacency_df = nx.to_pandas_adjacency(graph)
@@ -54,16 +58,10 @@ def make_macro_network_analysis(graph, clustering_method):
 
     # Volume traded by clique
     total_vol = np.sum([graph[edge[0]][edge[1]]["volume"] for edge in graph.edges()])
-    print(total_vol)
-    ave_vol = list()
-    ave_clique_vol = list()
-    ave_clique_density = list()
-    ave_pct = list()
-    ave_relative_vol_within_clique = list()
-    n_commun = 0
 
+    commun_results = list()
     for clique,agents in clique_agents_map.items():
-        print("Clique no {}".format(clique))
+        #print("Clique no {}".format(clique))
 
         clique_graph = graph.subgraph(agents) # make subgraph of clique with volumes
 
@@ -74,42 +72,40 @@ def make_macro_network_analysis(graph, clustering_method):
         for agent in agents:
             vol += np.sum([data["volume"] for data in graph[agent].values()]) #sum volume traded by agent to other agents
             graph.nodes[agent]["community"] = clique #set the community property to the clique number
-            relative_vol_within_clique.append(np.sum([data["weight"] for data in clique_graph[agent].values()]))
-
+            relative_vol_within_clique.append(np.sum([data["out fraction"] for data in clique_graph[agent].values()]))
 
         pct_of_nodes = 100.*len(agents)/len(graph.nodes())
-        print("Pct of Nodes {}".format(pct_of_nodes))
-        print("mean relative volume within clique {}".format(np.mean(relative_vol_within_clique)))
-
-        print(vol,vol/total_vol)
-
-
-
         vol_within_clique = np.sum([clique_graph[edge[0]][edge[1]]["volume"] for edge in clique_graph.edges()])
-        print(vol_within_clique,vol_within_clique/total_vol)
         density = nx.density(clique_graph)
 
-        print("density {}".format(density))
-        if pct_of_nodes >= 5.:
-            ave_pct.append(pct_of_nodes)
-            ave_vol.append(vol)
-            ave_clique_vol.append(vol_within_clique)
-            ave_clique_density.append(density)
-            ave_relative_vol_within_clique.append(np.mean(relative_vol_within_clique))
-            n_commun += 1
-    print("number of communities containing more than 5 pct of nodes {}".format(n_commun))
-    print("average pct of nodes in community {}".format(np.mean(ave_pct)))
-    print("average clique density: {}".format(np.mean(ave_clique_density)))
+        commun_results.append(pd.Series([pct_of_nodes,
+                                            np.mean(relative_vol_within_clique),
+                                            density, vol, total_vol,vol_within_clique,vol_within_clique/total_vol]))
 
-    print("average volume traded by clique: {}\n fraction of total {}".format(np.mean(ave_vol),np.mean(ave_vol)/total_vol))
-    print("average volume traded within clique: {}\n fraction of total {}".format(np.mean(ave_clique_vol),np.mean(ave_clique_vol)/total_vol))
-    print("average fraction of traded volume from within clique {}".format(np.mean(ave_relative_vol_within_clique)))
-    print("***\n")
-    return graph
+    commun_results = pd.DataFrame(commun_results)
+    commun_results.columns = ["pct nodes in clique",
+                                                          "ave rel volume in clique",
+                                                          "density",
+                                                          "comun volume",
+                                                          "total volume",
+                                                          "volume within",
+                                                          "rel volume within"]
+    commun_results=commun_results.sort_values(by=["pct nodes in clique"], ascending=False)
+
+    #print(commun_results)
+    #print("number of communities containing more than 5 pct of nodes {}".format(n_commun))
+    #print("average pct of nodes in community {}".format(np.mean(ave_pct)))
+    #print("average clique density: {}".format(np.mean(ave_clique_density)))
+
+    #print("average volume traded by clique: {}\n fraction of total {}".format(np.mean(ave_vol),np.mean(ave_vol)/total_vol))
+    #print("average volume traded within clique: {}\n fraction of total {}".format(np.mean(ave_clique_vol),np.mean(ave_clique_vol)/total_vol))
+    #print("average fraction of traded volume from within clique {}".format(np.mean(ave_relative_vol_within_clique)))
+    #print("***\n")
+    return graph,commun_results
 
 
-def make_micro_and_macro_network_analysis(input_path, cutoff,output_path):
-    nodes, edges = make_traded_volume_matrix(input_path, cutoff)
+def make_micro_and_macro_network_analysis(input_path, cutoff,graph_output_path,summary_output_path):
+    nodes, edges = make_traded_volume_matrix(trades.MatchedOrdersData(input_path), cutoff)
 
     graph = nx.DiGraph()  # Rows are the active agent
     graph.add_nodes_from(nodes)
@@ -119,9 +115,14 @@ def make_micro_and_macro_network_analysis(input_path, cutoff,output_path):
     calculate_total_node_volume(graph)
 
     make_micro_network_analysis(nodes, edges, graph)
-    directed_graph_with_cliques = make_louvian_clustering_analysis(graph)
+    directed_graph_with_cliques,clique_results = make_louvian_clustering_analysis(graph)
     #directed_graph_with_cliques = make_negopy_clustering_analysis(graph)
-    nx.write_gexf(directed_graph_with_cliques, output_path)
+    clique_results.to_csv(summary_output_path)
+    nx.write_gexf(directed_graph_with_cliques, graph_output_path)
+
+if __name__ == "__main__":
+    input_path, graph_output_path, summary_output_path = sys.argv[1:]
+    make_micro_and_macro_network_analysis(input_path, 0.05, graph_output_path, summary_output_path)
 
 
 

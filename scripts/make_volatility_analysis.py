@@ -3,6 +3,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import trades
 from make_network import make_traded_volume_matrix,make_directed_graph,save_directed_graph
+from make_micro_network_analysis import calculate_total_node_volume,normalize_directional_graph
+import networkx as nx
+import seaborn as sns
+from nxviz.plots import CircosPlot
+import copy
 
 def assign_percentiles(bars : pd.DataFrame, quantiles = 5, statistic = "range") -> pd.DataFrame:
     bars["quantile"] = pd.qcut(bars[statistic].rank(method='first'), quantiles,
@@ -48,25 +53,14 @@ def make_volatility_analysis(input_path):
     ax.set_ylabel("15 min range")
     fig.savefig("testing/test_data/figures/open_quantiles.png")
 
-def match_bars_and_trades():
-    trades_path = "testing/test_data/ABC_NYSE@0_Matching-MatchedOrders.csv"
-    bars_path = "testing/test_data/reduced_data/0_ABC_bars_15T.csv.gz"
-    trades_data = trades.MatchedOrdersData(trades_path)
-    trades_data.matched_orders.index = trades_data.matched_orders["DateTime"] # make datetime index
-    bars = pd.read_csv(bars_path)
 
-    # Assign Quantiles
-    bars = assign_percentiles(bars, 5)
-    bars = bars[bars["quantile"] == 5].reset_index()
-    windows = list()
-    for i in range(len(bars)-1):
-        windows.append([bars["first"].loc[i],bars["last"].loc[i]])
+        #c = CircosPlot(directed_graph,edge_width="weight",node_labels=True, node_size=0.0)
+        #c.draw()
+        #plt.savefig("{}_test.png".format(target_quant))
+        #save_directed_graph(directed_graph, "testing/test_data/reduced_data/{}_quant_network.gexf".format(target_quant))
 
-    trades_data.select_data_in_windows(windows)
-    traded_volume_matrix = make_traded_volume_matrix(trades_data, cutoff = 0.0)
-    directed_graph = make_directed_graph(traded_volume_matrix[0],traded_volume_matrix[1])
-    save_directed_graph(directed_graph, "testing/test_data/reduced_data/5_quant_network.gefx")
-    print("x")
+
+#    print("x")
 
 
 

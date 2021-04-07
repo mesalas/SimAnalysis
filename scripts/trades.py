@@ -1,5 +1,5 @@
 import pandas as pd
-from scripts import timemethods
+import timemethods
 import numpy as np
 #from tqdm import tqdm
 import logging
@@ -91,8 +91,14 @@ class MatchedOrdersData:
         return timemethods.process_timestamps(matched_orders, timestamp_col_name, timestamp_units, self.time_zone,
                                               self.open_time, self.trading_day_length)
 
+    def bars_returns(self,x):
+        if len(x) > 1:
+            return np.log(x.iloc[-1]) - np.log(x.iloc[0])
+        else:
+            return 0
+
     def make_trade_bars(self, freq : str) -> pd.DataFrame:
-        bar_returns = lambda x : np.log(x.iloc[-1]) - np.log(x.iloc[0])
+        #bar_returns = lambda x : np.log(x.iloc[-1]) - np.log(x.iloc[0])
         bar_range = lambda x : np.max(x) - np.min(x)
         daily_grouped_trade_price = self.matched_orders[["DateTime", self.active_fill_price_col]].groupby(
             pd.Grouper(key="DateTime",
@@ -103,7 +109,7 @@ class MatchedOrdersData:
         for name,group in daily_grouped_trade_price:
             group = group.set_index("DateTime", drop=False)
             group = group.resample(freq
-                   ).agg({self.active_fill_price_col :["first", "last", np.max, np.min, bar_range, bar_returns],
+                   ).agg({self.active_fill_price_col :["first", "last", np.max, np.min, bar_range, self.bars_returns],
                           "DateTime" : ["first", "last"]}) #.reset_index(level=0,
             group.columns = ['open', 'close', 'high', 'low', "range", "return", "first", "last"] #rename columns
             #group.columns = group.columns.droplevel(0)
@@ -116,6 +122,7 @@ class MatchedOrdersData:
         bars = pd.concat(bars)
         bars["DateTime"] = bars.index
         return timemethods.date_time_to_sim_time(bars).reset_index(drop = True)
+
     def select_data_in_windows(self,windows):
         self.matched_orders.index = self.matched_orders["DateTime"]
         selected_trades = list()
@@ -123,8 +130,15 @@ class MatchedOrdersData:
             try:
                 selected_trades.append(self.matched_orders.loc[window[0]:window[1]])
             except:
+                print("could not select",window[0],window[1])
                 continue
         self.matched_orders = pd.concat(selected_trades)
+
+    def strip_agent_numbers(self):
+        self.matched_orders["active_agent"] = self.matched_orders["active_agent"].apply(
+            lambda s: s.split("-")[0])
+        self.matched_orders["passive_agent"] = self.matched_orders["passive_agent"].apply(
+            lambda s: s.split("-")[0])
 
     def get_unique_agent_classes(self):
         return pd.Series([s.split('-')[0] for s in self.matched_orders[self.active_agent_col]]).unique()
@@ -230,6 +244,54 @@ class MatchedOrdersData:
 
     def make_directional_agent_pair_volumes(self):
         return self.matched_orders.groupby(["active_agent","passive_agent"])[" passive_fillQty"].sum().reset_index().rename(columns = {" passive_fillQty": "volume"})
+
+    def make_traded_volume_matrix(self, cutoff):
+        # Make matrix of trades between agents and list of agent names. The number of trades will be used as the strength of the connections
+        # The names will be the nodes
+        agent_volumes = self.make_directional_agent_pair_volumes()
+        groups = agent_volumes.groupby("active_agent")
+        total_volume_for_first_agent = groups.transform(np.sum)
+        # if normalize == True:
+        #    agent_volumes["volume"] = agent_volumes["volume"] / total_volume_for_first_agent["volume"]
+
+        nodes = agent_volumes["active_agent"].append(agent_volumes["passive_agent"]).unique()
+        edges = [t for t, total in
+                 zip(agent_volumes.itertuples(index=False, name=None), total_volume_for_first_agent["volume"]) if
+                 t[2] > cutoff * total and t[0] != t[1]]
+
+        return nodes, edges
+
+    def passive_active_stat(self):
+        active_agents = pd.Series(self.matched_orders[self.active_agent_col].unique())
+        #active_agents.apply(lambda s: s.split("-")[0]).value_counts()
+        passive_agents = pd.Series(self.matched_orders[self.passive_agent_col].unique())
+
+        number_of_agents = pd.DataFrame({"active count" : active_agents.apply(lambda s: s.split("-")[0]).value_counts(),
+                                         "passive count" : passive_agents.apply(lambda s: s.split("-")[0]).value_counts()}).fillna(0)
+
+        volume = list()
+        ntrades = list()
+        for index,row in number_of_agents.iterrows():
+            volume.append(self.matched_orders[self.matched_orders[self.active_agent_col].str.contains(index)][
+            self.passive_fill_qty_col].sum())
+            ntrades.append(self.matched_orders[self.matched_orders[self.active_agent_col].str.contains(index)][
+                              self.passive_fill_qty_col].count())
+        number_of_agents["active volume"] = volume
+        number_of_agents["active trades"] = ntrades
+
+        volume = list()
+        ntrades = list()
+        for index,row in number_of_agents.iterrows():
+            volume.append(self.matched_orders[self.matched_orders[self.passive_agent_col].str.contains(index)][
+            self.passive_fill_qty_col].sum())
+            ntrades.append(self.matched_orders[self.matched_orders[self.passive_agent_col].str.contains(index)][
+                              self.passive_fill_qty_col].count())
+        number_of_agents["passive volume"] = volume
+        number_of_agents["passive trades"] = ntrades
+
+        return number_of_agents
+
+
 
 
 

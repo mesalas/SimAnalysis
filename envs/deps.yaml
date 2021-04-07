@@ -3,3 +3,10 @@ channels:
 dependencies:
   - pandas
   - matplotlib
+  - nxviz
+  - tqdm
+  - seaborn
+  - pip:
+    - python-louvain
+    - jenkspy
+    - kneed
