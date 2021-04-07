@@ -5,6 +5,7 @@ import make_average_networks as make_average_networks
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 
@@ -35,72 +36,90 @@ def make_plot(directed_graph_with_cliques,ax):
 
 class MyTestCase(unittest.TestCase):
     def test_pl_analysis(self):
+        hm_fig,hm_ax = plt.subplots(nrows=2, ncols=3, figsize = (20,10))
         fig,ax = plt.subplots(nrows=2, ncols=3, figsize = (20,10))
-        dispersed_inputs = ["../temp_data/run93/batch1/working/reduced_data/1_ABC_1q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch2/working/reduced_data/2_ABC_1q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch3/working/reduced_data/3_ABC_1q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch4/working/reduced_data/4_ABC_1q_volume_heatmap_1T.csv"]
+        dispersed_inputs = ["../temp_data/run93/batch1/working/reduced_data/1_ABC_1q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch2/working/reduced_data/2_ABC_1q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch3/working/reduced_data/3_ABC_1q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch4/working/reduced_data/4_ABC_1q_volume_heatmap_60T.csv"]
 
-        intermediate_inputs = ["../temp_data/run93/batch5/working/reduced_data/5_ABC_1q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch6/working/reduced_data/6_ABC_1q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch7/working/reduced_data/7_ABC_1q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch8/working/reduced_data/8_ABC_1q_volume_heatmap_1T.csv"]
+        intermediate_inputs = ["../temp_data/run93/batch5/working/reduced_data/5_ABC_1q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch6/working/reduced_data/6_ABC_1q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch7/working/reduced_data/7_ABC_1q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch8/working/reduced_data/8_ABC_1q_volume_heatmap_60T.csv"]
 
-        concentrated_inputs = ["../temp_data/run93/batch9/working/reduced_data/9_ABC_1q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch10/working/reduced_data/10_ABC_1q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch11/working/reduced_data/11_ABC_1q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch12/working/reduced_data/12_ABC_1q_volume_heatmap_1T.csv"
+        concentrated_inputs = ["../temp_data/run93/batch9/working/reduced_data/9_ABC_1q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch10/working/reduced_data/10_ABC_1q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch11/working/reduced_data/11_ABC_1q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch12/working/reduced_data/12_ABC_1q_volume_heatmap_60T.csv"
                   ]
 
 
-        graph_output = "../temp_data/run93/dispersed_ABC_1q_1T.gexf"
-        summary_output = "../temp_data/run93/dispersed_ABC_1q_1T.csv"
+        graph_output = "../temp_data/run93/dispersed_ABC_1q_60T.gexf"
+        summary_output = "../temp_data/run93/dispersed_ABC_1q_60T.csv"
 
         directed_graph_with_cliques = make_average_networks.make_average_networks(graph_output,summary_output,dispersed_inputs)
         make_plot(directed_graph_with_cliques, ax[0][0])
-        graph_output = "../temp_data/run93/concentrated_ABC_1q_1T.gexf"
-        summary_output = "../temp_data/run93/concentrated_ABC_1q_1T.csv"
+        graph_output = "../temp_data/run93/concentrated_ABC_1q_60T.gexf"
+        summary_output = "../temp_data/run93/concentrated_ABC_1q_60T.csv"
+
+
+        hm_ax[0][0] = sns.heatmap(nx.to_pandas_adjacency(directed_graph_with_cliques, weight="volume"), linewidths=.5,
+                         ax=hm_ax[0][0])
+
 
         directed_graph_with_cliques =make_average_networks.make_average_networks(graph_output,summary_output,concentrated_inputs)
         make_plot(directed_graph_with_cliques, ax[0][1])
-        graph_output = "../temp_data/run93/intermediate_ABC_1q_1T.gexf"
-        summary_output = "../temp_data/run93/intermediate_ABC_1q_1T.csv"
+        hm_ax[0][1] = sns.heatmap(nx.to_pandas_adjacency(directed_graph_with_cliques, weight="volume"), linewidths=.5,
+                            ax=hm_ax[0][1])
+        graph_output = "../temp_data/run93/intermediate_ABC_1q_60T.gexf"
+        summary_output = "../temp_data/run93/intermediate_ABC_1q_60T.csv"
 
         directed_graph_with_cliques =make_average_networks.make_average_networks(graph_output,summary_output,intermediate_inputs)
         make_plot(directed_graph_with_cliques, ax[0][2])
-        dispersed_inputs = ["../temp_data/run93/batch1/working/reduced_data/1_ABC_20q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch2/working/reduced_data/2_ABC_20q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch3/working/reduced_data/3_ABC_20q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch4/working/reduced_data/4_ABC_20q_volume_heatmap_1T.csv"]
+        hm_ax[0][2] = sns.heatmap(nx.to_pandas_adjacency(directed_graph_with_cliques, weight="volume"), linewidths=.5,
+                            ax=hm_ax[0][2])
 
-        intermediate_inputs = ["../temp_data/run93/batch5/working/reduced_data/5_ABC_20q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch6/working/reduced_data/6_ABC_20q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch7/working/reduced_data/7_ABC_20q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch8/working/reduced_data/8_ABC_20q_volume_heatmap_1T.csv"]
+        dispersed_inputs = ["../temp_data/run93/batch1/working/reduced_data/1_ABC_20q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch2/working/reduced_data/2_ABC_20q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch3/working/reduced_data/3_ABC_20q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch4/working/reduced_data/4_ABC_20q_volume_heatmap_60T.csv"]
 
-        concentrated_inputs = ["../temp_data/run93/batch9/working/reduced_data/9_ABC_20q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch10/working/reduced_data/10_ABC_20q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch11/working/reduced_data/11_ABC_20q_volume_heatmap_1T.csv",
-                  "../temp_data/run93/batch12/working/reduced_data/12_ABC_20q_volume_heatmap_1T.csv"
+        intermediate_inputs = ["../temp_data/run93/batch5/working/reduced_data/5_ABC_20q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch6/working/reduced_data/6_ABC_20q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch7/working/reduced_data/7_ABC_20q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch8/working/reduced_data/8_ABC_20q_volume_heatmap_60T.csv"]
+
+        concentrated_inputs = ["../temp_data/run93/batch9/working/reduced_data/9_ABC_20q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch10/working/reduced_data/10_ABC_20q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch11/working/reduced_data/11_ABC_20q_volume_heatmap_60T.csv",
+                  "../temp_data/run93/batch12/working/reduced_data/12_ABC_20q_volume_heatmap_60T.csv"
                   ]
 
 
-        graph_output = "../temp_data/run93/dispersed_ABC_20q_1T.gexf"
-        summary_output = "../temp_data/run93/dispersed_ABC_20q_1T.csv"
+        graph_output = "../temp_data/run93/dispersed_ABC_20q_60T.gexf"
+        summary_output = "../temp_data/run93/dispersed_ABC_20q_60T.csv"
 
         directed_graph_with_cliques =make_average_networks.make_average_networks(graph_output,summary_output,dispersed_inputs)
         make_plot(directed_graph_with_cliques, ax[1][0])
-        graph_output = "../temp_data/run93/concentrated_ABC_20q_1T.gexf"
-        summary_output = "../temp_data/run93/concentrated_ABC_20q_1T.csv"
+        hm_ax[1][0] = sns.heatmap(nx.to_pandas_adjacency(directed_graph_with_cliques, weight="volume"), linewidths=.5,
+                            ax=hm_ax[1][0])
+        graph_output = "../temp_data/run93/concentrated_ABC_20q_60T.gexf"
+        summary_output = "../temp_data/run93/concentrated_ABC_20q_60T.csv"
 
         directed_graph_with_cliques =make_average_networks.make_average_networks(graph_output,summary_output,concentrated_inputs)
         make_plot(directed_graph_with_cliques, ax[1][1])
-        graph_output = "../temp_data/run93/intermediate_ABC_20q_1T.gexf"
-        summary_output = "../temp_data/run93/intermediate_ABC_20q_1T.csv"
+        hm_ax[1][1] = sns.heatmap(nx.to_pandas_adjacency(directed_graph_with_cliques, weight="volume"), linewidths=.5,
+                            ax=hm_ax[1][1])
+        graph_output = "../temp_data/run93/intermediate_ABC_20q_60T.gexf"
+        summary_output = "../temp_data/run93/intermediate_ABC_20q_60T.csv"
 
         directed_graph_with_cliques =make_average_networks.make_average_networks(graph_output,summary_output,intermediate_inputs)
         make_plot(directed_graph_with_cliques, ax[1][2])
+        hm_ax[1][2] = sns.heatmap(nx.to_pandas_adjacency(directed_graph_with_cliques, weight="volume"), linewidths=.5,
+                            ax=hm_ax[1][2])
         fig.tight_layout()
-        fig.savefig("../temp_data/run93/networks.png")
+        fig.savefig("../temp_data/run93/networks_60T.png")
+        hm_fig.show()
 if __name__ == '__main__':
     unittest.main()

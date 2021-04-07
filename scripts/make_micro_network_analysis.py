@@ -80,7 +80,7 @@ def make_macro_network_analysis(graph, clustering_method):
 
         commun_results.append(pd.Series([pct_of_nodes,
                                             np.mean(relative_vol_within_clique),
-                                            density, vol, total_vol,vol_within_clique,vol_within_clique/total_vol]))
+                                            density, vol, total_vol,vol_within_clique,vol_within_clique/vol]))
 
     commun_results = pd.DataFrame(commun_results)
     commun_results.columns = ["pct nodes in clique",
