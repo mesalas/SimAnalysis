@@ -1,17 +1,17 @@
 rule all:
   input:
-    #expand(["../temp_data/run93/batch{no}/working/figures/{no}_mp_{freq}.png"], no = [i for i in range(1,13)], freq = "5T"),
-    #expand(["../temp_data/run93/batch{no}/working/figures/{no}_daily_pl.png"],  no = [i for i in range(1,13)]),
-    #expand(["../temp_data/run93/batch{no}/working/figures/{no}_daily_volume.png"],  no = [i for i in range(1,13)]),
-    #expand(["../temp_data/run93/batch{no}/working/figures/{no}_{symbol}_volatility_{freq}.png"],  no = [i for i in range(1,13)], symbol = ["ABC", "DEF", "GHI"], freq = ["1T", "60T"]),
-    #expand(["../temp_data/run93/batch{no}/working/figures/{no}_{symbol}_{quantile}q_volume_heatmap_{freq}.png"],
-    #       no = [i for i in range(1,13)], symbol = ["ABC", "DEF", "GHI"], freq = ["1T", "60T"], quantile=[1,20] ),
-    #expand(["../temp_data/run93/batch{no}/working/reduced_data/{no}_{symbol}_{quantile}q_trading_table_{freq}.csv"],
-    #       no = [i for i in range(1,13)], symbol = ["ABC", "DEF", "GHI"], freq = ["1T", "60T"], quantile=[1,20] ),
-    #expand(["../temp_data/run93/batch{no}/working/reduced_data/{no}_{symbol}_{quantile}q_volume_heatmap_{freq}.csv"],
-    #       no = [i for i in range(1,13)], symbol = ["ABC", "DEF", "GHI"], freq = ["1T", "60T"], quantile=[1,20] ),
-    expand(["../temp_data/run93/batch{no}/working/reduced_data/{no}_{symbol}_directed_graph.gexf"], no = [i for i in range(1,13)], symbol = ["ABC", "DEF", "GHI"]),
-    expand(["../temp_data/run93/batch{no}/working/reduced_data/{no}_{symbol}_directed_graph_sum.csv"], no = [i for i in range(1,13)], symbol = ["ABC", "DEF", "GHI"])
+    expand(["../temp_data/run95/batch{no}/out/figures/{no}_mp_{freq}.png"], no = [i for i in range(1,13)], freq = "5T"),
+    expand(["../temp_data/run95/batch{no}/out/figures/{no}_daily_pl.png"],  no = [i for i in range(1,13)]),
+    expand(["../temp_data/run95/batch{no}/out/figures/{no}_daily_volume.png"],  no = [i for i in range(1,13)]),
+    expand(["../temp_data/run95/batch{no}/out/figures/{no}_{symbol}_volatility_{freq}.png"],  no = [i for i in range(1,13)], symbol = ["ABC", "DEF", "GHI"], freq = ["1T", "60T"]),
+    expand(["../temp_data/run95/batch{no}/out/figures/{no}_{symbol}_{quantile}q_volume_heatmap_{freq}.png"],
+          no = [i for i in range(1,13)], symbol = ["ABC", "DEF", "GHI"], freq = ["1T", "60T"], quantile=[1,20] ),
+    expand(["../temp_data/run95/batch{no}/out/reduced_data/{no}_{symbol}_{quantile}q_trading_table_{freq}.csv"],
+          no = [i for i in range(1,13)], symbol = ["ABC", "DEF", "GHI"], freq = ["1T", "60T"], quantile=[1,20] ),
+    expand(["../temp_data/run95/batch{no}/out/reduced_data/{no}_{symbol}_{quantile}q_volume_heatmap_{freq}.csv"],
+          no = [i for i in range(1,13)], symbol = ["ABC", "DEF", "GHI"], freq = ["1T", "60T"], quantile=[1,20] ),
+    expand(["../temp_data/run95/batch{no}/out/reduced_data/{no}_{symbol}_directed_graph.gexf"], no = [i for i in range(1,13)], symbol = ["ABC", "DEF", "GHI"]),
+    expand(["../temp_data/run95/batch{no}/out/reduced_data/{no}_{symbol}_directed_graph_sum.csv"], no = [i for i in range(1,13)], symbol = ["ABC", "DEF", "GHI"])
 
 rule get_analysis_framework:
     output: "scripts/make_midprices.py","scripts/plot_midprice.py"
@@ -19,7 +19,7 @@ rule get_analysis_framework:
 
 rule make_volatility_and_volume_analysis:
     input:
-         "{path}/{symbol}_NYSE@0_Matching-MatchedOrders.csv",
+         "{path}/{symbol}_NYSE@0_Matching-MatchedOrders.csv.gz",
          "{path}/reduced_data/{no}_{symbol}_bars_{freq}.csv.gz"
     output:
           "{path}/reduced_data/{no}_{symbol}_{quantile}q_trading_table_{freq}.csv",
@@ -32,7 +32,7 @@ rule make_volatility_and_volume_analysis:
 
 rule bars_data:
     input:
-         "{path}/{symbol}_NYSE@0_Matching-MatchedOrders.csv" #,"scripts/BarsFromTrades.py"
+         "{path}/{symbol}_NYSE@0_Matching-MatchedOrders.csv.gz" #,"scripts/BarsFromTrades.py"
     output:
           "{path}/reduced_data/{no}_{symbol}_bars_{freq}.csv.gz"
     conda:
@@ -53,7 +53,7 @@ rule volatility_plots:
 
 rule midprice_data:
     input:
-         "{path}/{symbol}_NYSE@0_Matching-OrderBook.csv" #,"scripts/BarsFromTrades.py"
+         "{path}/{symbol}_NYSE@0_Matching-OrderBook.csv.gz" #,"scripts/BarsFromTrades.py"
     output:
           "{path}/reduced_data/{no}_{symbol}_mp_{freq}.csv.gz"
     conda:
@@ -63,7 +63,7 @@ rule midprice_data:
 
 rule daily_pl_data:
     input:
-         "{path}/{symbol}_NYSE@0_Matching-agents.csv" #,"scripts/BarsFromTrades.py"
+         "{path}/{symbol}_NYSE@0_Matching-agents.csv.gz" #,"scripts/BarsFromTrades.py"
     output:
           "{path}/reduced_data/{no}_{symbol}_agent_daily_pl.csv.gz"
     conda:
@@ -73,7 +73,7 @@ rule daily_pl_data:
 
 rule daily_volume_data:
     input:
-         "{path}/{symbol}_NYSE@0_Matching-agents.csv" #,"scripts/BarsFromTrades.py"
+         "{path}/{symbol}_NYSE@0_Matching-agents.csv.gz" #,"scripts/BarsFromTrades.py"
     output:
           "{path}/reduced_data/{no}_{symbol}_agent_daily_volume.csv.gz"
     conda:
@@ -122,7 +122,7 @@ rule volume_plots:
 
 rule network_analysis:
     input:
-         "{path}/{symbol}_NYSE@0_Matching-MatchedOrders.csv",
+         "{path}/{symbol}_NYSE@0_Matching-MatchedOrders.csv.gz",
     output:
           "{path}/reduced_data/{no}_{symbol}_directed_graph.gexf",
           "{path}/reduced_data/{no}_{symbol}_directed_graph_sum.csv"
