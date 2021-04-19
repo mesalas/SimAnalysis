@@ -52,7 +52,7 @@ def make_final_pl_analysis(dispersed_inputs,intermediate_inputs, concentrated_in
     rects2 = ax.bar(x + width / 2, slow, width, label='Slow')
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
-    ax.set_ylabel('Scores')
+    ax.set_ylabel('PL')
     #ax.set_title('Scores by group and gender')
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
